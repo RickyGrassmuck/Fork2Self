@@ -73,16 +73,17 @@ You can revisit any of these later from the extension's settings page.
 
 ## Build
 
-Requires Node 20+.
+Requires [Bun](https://bun.sh) 1.3+.
 
 ```bash
-npm install
-npm run check       # typecheck + build
-npm run watch       # rebuild on changes
+bun install
+bun run check       # typecheck + build
+bun run watch       # rebuild on changes
 ```
 
 Output lands in `dist/`. Load it as a temporary add-on via
-`about:debugging` for development.
+`about:debugging` for development. A clean install + build runs in well
+under two seconds on a warm cache.
 
 ### Taskfile
 
@@ -102,7 +103,7 @@ task clean       # remove dist/, web-ext-artifacts/, *.xpi
 ## Package
 
 ```bash
-npm run package
+bun run package
 ```
 
 Produces `fork2self-<version>.xpi` at the repo root. Requires the `zip`
@@ -131,7 +132,7 @@ Secrets):
 | `WEB_EXT_API_KEY`     | JWT issuer from <https://addons.mozilla.org/developers/addon/api/key/> (e.g. `user:12345:678`). |
 | `WEB_EXT_API_SECRET`  | JWT secret from the same page.                                                   |
 
-You can also sign locally with `npm run sign` if those env vars are set.
+You can also sign locally with `bun run sign` if those env vars are set.
 The default channel is `unlisted` (signed XPI for self-distribution, not
 publicly listed on AMO).
 
@@ -154,8 +155,8 @@ src/
   backends/           destination implementations (gitea, gitlab)
   sources/            source URL parsers (github, gitlab, gitea, bitbucket, git)
   icons/              extension icon
-build.mjs             esbuild driver
-scripts/package.mjs   XPI packager
+build.ts              Bun bundler driver
+scripts/package.ts    XPI packager
 ```
 
 Sources and backends self-register with `core.ts`'s registry at import time.

@@ -16,22 +16,22 @@ tasks:
     silent: true
 
   install:
-    desc: Install npm dependencies (clean, lockfile-respecting)
+    desc: Install dependencies (frozen against bun.lock)
     cmds:
-      - npm ci
+      - bun install --frozen-lockfile
 
   typecheck:
     desc: Run the TypeScript compiler in noEmit mode
     cmds:
-      - npm run typecheck
+      - bun run typecheck
 
   build:
     desc: Bundle extension sources to dist/
     cmds:
-      - npm run build
+      - bun run build
     sources:
       - src/**/*
-      - build.mjs
+      - build.ts
       - tsconfig.json
     generates:
       - "{{.DIST}}/**/*"
@@ -39,7 +39,7 @@ tasks:
   watch:
     desc: Rebuild on changes (foreground; Ctrl-C to stop)
     cmds:
-      - npm run watch
+      - bun run watch
 
   check:
     desc: Typecheck + build
@@ -49,18 +49,18 @@ tasks:
     desc: Validate the built extension with web-ext lint
     deps: [build]
     cmds:
-      - npm run lint:ext
+      - bun run lint:ext
 
   package:
     desc: Build and produce an unsigned XPI at the repo root
     cmds:
-      - npm run package
+      - bun run package
 
   run:
     desc: Launch a temporary Firefox with the extension loaded (live reload)
     deps: [build]
     cmds:
-      - npx web-ext run --source-dir {{.DIST}}
+      - bunx web-ext run --source-dir {{.DIST}}
 
   sign:
     desc: Sign the extension via Mozilla AMO (needs WEB_EXT_API_KEY/SECRET)
@@ -71,7 +71,7 @@ tasks:
       - sh: '[ -n "$WEB_EXT_API_SECRET" ]'
         msg: "WEB_EXT_API_SECRET is not set. Export it or source .mozilla-creds.env."
     cmds:
-      - npm run sign
+      - bun run sign
 
   ci-build:
     desc: Reproduce the build.yml CI workflow locally
