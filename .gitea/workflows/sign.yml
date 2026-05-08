@@ -41,7 +41,7 @@ jobs:
 
       - name: Read version
         id: version
-        run: echo "version=$(bun -e 'console.log(require(\"./package.json\").version)')" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(bun pm pkg get version | tr -d '\"')" >> "$GITHUB_OUTPUT"
 
       - name: Sign with web-ext
         env:
