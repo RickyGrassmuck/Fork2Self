@@ -2,5 +2,6 @@ node_modules/
 dist/
 *.log
 *.xpi
+web-ext-artifacts/
 .mozilla-creds.env
 .claude/

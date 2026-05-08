@@ -95,9 +95,30 @@ command on PATH.
 
 ## CI
 
-A manual-trigger Gitea Actions workflow lives at
-`.gitea/workflows/build.yml`. Run it from the Actions tab when you want a
-build artifact — it typechecks, builds, packages, and uploads the XPI.
+Two manual-trigger Gitea Actions workflows live in `.gitea/workflows/`:
+
+- **`build.yml`** — typechecks, builds, packages, and uploads an unsigned
+  XPI as an artifact.
+- **`sign.yml`** — typechecks, builds, lints with `web-ext`, then signs via
+  Mozilla's AMO. Channel (`unlisted` / `listed`) is a workflow input.
+  Uploads the signed XPI as an artifact.
+
+Both are gated to `workflow_dispatch` only — no automatic runs on push or
+PR. Trigger them from the Gitea Actions UI when you're ready.
+
+### Signing secrets
+
+The signing workflow needs two repo secrets (Settings → Actions →
+Secrets):
+
+| Secret name           | Source                                                                           |
+|-----------------------|----------------------------------------------------------------------------------|
+| `WEB_EXT_API_KEY`     | JWT issuer from <https://addons.mozilla.org/developers/addon/api/key/> (e.g. `user:12345:678`). |
+| `WEB_EXT_API_SECRET`  | JWT secret from the same page.                                                   |
+
+You can also sign locally with `npm run sign` if those env vars are set.
+The default channel is `unlisted` (signed XPI for self-distribution, not
+publicly listed on AMO).
 
 ## Project layout
 
