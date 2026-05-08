@@ -1,0 +1,44 @@
+name: Build XPI
+
+# Manual-only. No push/PR triggers — run from the Gitea Actions UI when
+# you're ready to cut a build artifact.
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Read version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Package XPI
+        run: |
+          cd dist
+          zip -r -FS "../fork2self-${{ steps.version.outputs.version }}.xpi" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: fork2self-${{ steps.version.outputs.version }}
+          path: fork2self-${{ steps.version.outputs.version }}.xpi
+          if-no-files-found: error

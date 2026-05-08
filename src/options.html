@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Fork2Self — Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <h1>Fork2Self</h1>
+      <p class="muted">Settings</p>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Settings sections">
+      <button type="button" role="tab" id="tab-btn-backend" aria-controls="tab-backend" aria-selected="true" data-tab="backend">Backend</button>
+      <button type="button" role="tab" id="tab-btn-sources" aria-controls="tab-sources" aria-selected="false" data-tab="sources">Sources</button>
+      <button type="button" role="tab" id="tab-btn-general" aria-controls="tab-general" aria-selected="false" data-tab="general">General</button>
+    </nav>
+
+    <form id="form">
+      <section id="tab-backend" role="tabpanel" aria-labelledby="tab-btn-backend" class="tab-panel">
+        <fieldset>
+          <legend>Destinations</legend>
+          <div class="destination-bar">
+            <label class="grow">
+              <span>Editing</span>
+              <select id="destinationSelect"></select>
+            </label>
+            <button type="button" id="dest-new" class="secondary">+ New</button>
+          </div>
+          <div class="row dest-actions">
+            <button type="button" id="dest-set-default" class="secondary">Set as default</button>
+            <span class="badge default-badge" id="default-badge" hidden>Default</span>
+            <button type="button" id="dest-delete" class="link danger">Delete this destination</button>
+          </div>
+          <p id="no-destinations" class="muted" hidden>No destinations yet — click "+ New" to add one.</p>
+        </fieldset>
+
+        <fieldset id="dest-form-set">
+          <legend>Connection</legend>
+
+          <label>
+            <span>Name</span>
+            <input type="text" id="destName" autocomplete="off" placeholder="e.g. Home Gitea" required>
+            <small>Friendly label shown in the popup, context menu, and history.</small>
+          </label>
+
+          <label>
+            <span>Self-hosted Git platform</span>
+            <select id="backendId"></select>
+          </label>
+          <p id="backend-description" class="muted"></p>
+
+          <label>
+            <span>Base URL</span>
+            <input type="url" id="baseUrl" placeholder="https://git.example.com" required>
+            <small>Root URL of your instance — no trailing slash.</small>
+          </label>
+
+          <label>
+            <span>Personal access token</span>
+            <input type="password" id="token" autocomplete="off" required>
+            <small id="token-help"></small>
+          </label>
+
+          <div class="row">
+            <button type="button" id="test" class="secondary">Test connection</button>
+            <p id="test-status" class="status inline" hidden></p>
+          </div>
+        </fieldset>
+
+        <fieldset id="dest-defaults-set">
+          <legend>Defaults for new forks</legend>
+
+          <label>
+            <span>Default destination owner</span>
+            <input type="text" id="defaultOwner" autocomplete="off" placeholder="your-user-or-group">
+            <small>Username, organization, or group on the target instance.</small>
+          </label>
+
+          <label class="checkbox" data-cap="private">
+            <input type="checkbox" id="defaultPrivate">
+            <span>Make new repos private by default</span>
+          </label>
+
+          <label class="checkbox" data-cap="mirror">
+            <input type="checkbox" id="defaultMirror">
+            <span>Create as a mirror (auto-sync from source) by default</span>
+          </label>
+        </fieldset>
+
+        <fieldset id="include-set">
+          <legend>Include from source (defaults)</legend>
+          <div class="grid">
+            <label class="checkbox" data-cap="wiki"><input type="checkbox" id="includeWiki"><span>Wiki</span></label>
+            <label class="checkbox" data-cap="labels"><input type="checkbox" id="includeLabels"><span>Labels</span></label>
+            <label class="checkbox" data-cap="issues"><input type="checkbox" id="includeIssues"><span>Issues</span></label>
+            <label class="checkbox" data-cap="pullRequests"><input type="checkbox" id="includePullRequests"><span>Pull requests</span></label>
+            <label class="checkbox" data-cap="releases"><input type="checkbox" id="includeReleases"><span>Releases</span></label>
+            <label class="checkbox" data-cap="milestones"><input type="checkbox" id="includeMilestones"><span>Milestones</span></label>
+          </div>
+          <small>Defaults are honored only when the source platform also supports that field (e.g. Bitbucket Cloud and Generic Git URLs are code-only).</small>
+        </fieldset>
+      </section>
+
+      <section id="tab-sources" role="tabpanel" aria-labelledby="tab-btn-sources" class="tab-panel" hidden>
+        <fieldset>
+          <legend>Recognized hostnames</legend>
+          <p class="muted" id="builtin-sources"></p>
+          <p class="muted">Add a custom mapping for self-hosted GitLab/Gitea/Forgejo instances so the popup and right-click menu work on those hosts.</p>
+          <div id="custom-hosts-list"></div>
+          <button type="button" id="add-host" class="secondary">Add hostname</button>
+        </fieldset>
+
+        <fieldset>
+          <legend>Source credentials (for private repos)</legend>
+          <p class="muted">Tokens are keyed by hostname. The destination backend uses them to clone — Gitea sends them as <code>auth_token</code>; GitLab embeds them in <code>import_url</code>. Bitbucket Cloud isn't supported here (needs username + app password).</p>
+          <div id="source-tokens-list"></div>
+          <button type="button" id="add-token" class="secondary">Add credential</button>
+        </fieldset>
+      </section>
+
+      <section id="tab-general" role="tabpanel" aria-labelledby="tab-btn-general" class="tab-panel" hidden>
+        <fieldset>
+          <legend>Behavior</legend>
+          <label class="checkbox">
+            <input type="checkbox" id="openAfterFork">
+            <span>Open the fork destination page after a successful fork</span>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Setup</legend>
+          <p class="muted">Re-run the welcome wizard if you'd like to start from scratch with a guided setup. Your saved settings won't change until you complete and save the wizard.</p>
+          <button type="button" id="open-welcome" class="secondary">Run setup wizard</button>
+        </fieldset>
+      </section>
+
+      <footer class="page-footer">
+        <button type="submit" class="primary">Save</button>
+        <p id="save-status" class="status inline" hidden></p>
+      </footer>
+    </form>
+  </main>
+
+  <script src="options.js"></script>
+</body>
+</html>

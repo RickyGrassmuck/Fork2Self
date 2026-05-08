@@ -1,0 +1,19 @@
+{
+  "name": "fork2self",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Firefox extension that forks GitHub/GitLab/Gitea/Bitbucket repos into your self-hosted Git instance.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run build",
+    "package": "node scripts/package.mjs"
+  },
+  "devDependencies": {
+    "@types/firefox-webext-browser": "^120.0.4",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Fork to self-hosted Git</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="page-header">
+    <div>
+      <h1>Fork2Self</h1>
+      <p class="muted">Fork to <span id="backend-label">self-hosted Git</span></p>
+    </div>
+    <button id="open-options" type="button" class="link" title="Settings">Settings</button>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button type="button" role="tab" id="tab-btn-fork" aria-controls="tab-fork" aria-selected="true" data-tab="fork">Fork</button>
+    <button type="button" role="tab" id="tab-btn-history" aria-controls="tab-history" aria-selected="false" data-tab="history">History</button>
+  </nav>
+
+  <section id="tab-fork" role="tabpanel" aria-labelledby="tab-btn-fork" class="tab-panel">
+    <section id="not-repo" hidden>
+      <p class="muted">Open a recognized repository page to fork it. Add custom self-hosted hostnames in <button type="button" class="link inline" id="open-options-3">Settings</button>.</p>
+    </section>
+
+    <section id="not-configured" hidden>
+      <p>Your self-hosted Git backend isn't set up yet.</p>
+      <button id="open-options-2" type="button" class="primary">Open settings</button>
+    </section>
+
+    <form id="fork-form" hidden>
+      <div class="source-bar">
+        <span class="source-platform" id="source-label">…</span>
+        <span class="source-repo" id="source-repo"></span>
+      </div>
+
+      <fieldset>
+        <legend>Destination</legend>
+
+        <label>
+          <span>Send to</span>
+          <select id="destination"></select>
+        </label>
+
+        <label>
+          <span>Owner</span>
+          <input type="text" id="owner" autocomplete="off" required>
+        </label>
+
+        <label>
+          <span>Repo name</span>
+          <input type="text" id="repo-name" autocomplete="off" required>
+        </label>
+
+        <label>
+          <span>Description</span>
+          <input type="text" id="description" autocomplete="off">
+        </label>
+
+        <div class="row">
+          <label class="checkbox" data-cap="private">
+            <input type="checkbox" id="private">
+            <span>Private</span>
+          </label>
+          <label class="checkbox" data-cap="mirror">
+            <input type="checkbox" id="mirror">
+            <span>Mirror (auto-sync)</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset id="include-section">
+        <legend>Include from source</legend>
+        <div class="grid">
+          <label class="checkbox" data-cap="wiki"><input type="checkbox" id="wiki"><span>Wiki</span></label>
+          <label class="checkbox" data-cap="labels"><input type="checkbox" id="labels"><span>Labels</span></label>
+          <label class="checkbox" data-cap="issues"><input type="checkbox" id="issues"><span>Issues</span></label>
+          <label class="checkbox" data-cap="pullRequests"><input type="checkbox" id="pullRequests"><span>Pull requests</span></label>
+          <label class="checkbox" data-cap="releases"><input type="checkbox" id="releases"><span>Releases</span></label>
+          <label class="checkbox" data-cap="milestones"><input type="checkbox" id="milestones"><span>Milestones</span></label>
+        </div>
+      </fieldset>
+
+      <button type="submit" id="submit" class="primary">Fork</button>
+      <p id="status" class="status" hidden></p>
+    </form>
+  </section>
+
+  <section id="tab-history" role="tabpanel" aria-labelledby="tab-btn-history" class="tab-panel" hidden>
+    <div id="history-list"></div>
+    <div class="row history-actions" id="history-actions" hidden>
+      <button type="button" id="clear-history" class="link">Clear history</button>
+    </div>
+  </section>
+
+  <script src="popup.js"></script>
+</body>
+</html>

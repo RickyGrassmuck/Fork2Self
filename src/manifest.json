@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Fork2Self",
+  "version": "0.4.0",
+  "description": "Fork (migrate) repositories from GitHub, GitLab, Gitea/Forgejo, Bitbucket, or any Git URL into your self-hosted Git instance with one click.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "fork2self@local",
+      "strict_min_version": "115.0"
+    }
+  },
+  "icons": {
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg"
+  },
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "activeTab",
+    "notifications"
+  ],
+  "host_permissions": [],
+  "optional_host_permissions": [
+    "*://*/*"
+  ],
+  "action": {
+    "default_title": "Fork to self-hosted Git",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/icon.svg"
+    }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "scripts": ["background.js"]
+  }
+}

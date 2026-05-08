@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Welcome to Fork2Self</title>
+  <link rel="stylesheet" href="welcome.css">
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <div class="brand">
+        <img src="icons/icon.svg" alt="" width="36" height="36">
+        <div>
+          <h1>Fork2Self</h1>
+          <p class="muted">Fork repositories into your self-hosted Git instance.</p>
+        </div>
+      </div>
+      <ol class="step-indicator" aria-label="Setup progress">
+        <li data-step="1">Welcome</li>
+        <li data-step="2">Destination</li>
+        <li data-step="3">Connect</li>
+        <li data-step="4">Source tokens</li>
+        <li data-step="5">Done</li>
+      </ol>
+    </header>
+
+    <!-- Step 1: Intro -->
+    <section class="step" data-step="1">
+      <h2>Welcome</h2>
+      <p>Fork2Self adds a one-click "fork" action to GitHub, GitLab, Gitea/Forgejo, and Bitbucket pages. Forks land in a self-hosted Git instance you control.</p>
+      <p>This wizard will configure your destination so you can fork right away. You can revisit any of these settings later from the extension's options page.</p>
+      <div class="actions">
+        <span></span>
+        <button type="button" class="primary" data-go="2">Get started</button>
+      </div>
+    </section>
+
+    <!-- Step 2: Pick destination -->
+    <section class="step" data-step="2" hidden>
+      <h2>Where should forks go?</h2>
+      <p class="muted">Pick the platform your self-hosted instance runs.</p>
+      <div id="backend-choices" class="choice-list" role="radiogroup" aria-label="Destination platform"></div>
+      <div class="actions">
+        <button type="button" class="secondary" data-go="1">Back</button>
+        <button type="button" class="primary" id="step2-next">Continue</button>
+      </div>
+    </section>
+
+    <!-- Step 3: Connect -->
+    <section class="step" data-step="3" hidden>
+      <h2>Connect to <span id="backend-name">your instance</span></h2>
+
+      <label>
+        <span>Name</span>
+        <input type="text" id="destName" placeholder="e.g. Home Gitea" required autocomplete="off">
+        <small>Friendly label shown in the popup, context menu, and history.</small>
+      </label>
+
+      <label>
+        <span>Base URL</span>
+        <input type="url" id="baseUrl" placeholder="https://git.example.com" required autocomplete="off">
+        <small>Root URL — no trailing slash.</small>
+      </label>
+
+      <label>
+        <span>Personal access token</span>
+        <input type="password" id="token" autocomplete="off" required>
+        <small id="token-help"></small>
+      </label>
+
+      <div class="row">
+        <button type="button" class="secondary" id="test">Test connection</button>
+        <p id="test-status" class="status inline" hidden></p>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="secondary" data-go="2">Back</button>
+        <button type="button" class="primary" id="step3-next" disabled>Save and continue</button>
+      </div>
+    </section>
+
+    <!-- Step 4: Source PATs (optional) -->
+    <section class="step" data-step="4" hidden>
+      <h2>Tokens for private source repos</h2>
+      <p>Add a personal access token for any platform whose private repos you'll fork. The destination backend uses these to clone — they're stored only in your browser and sent to your destination instance.</p>
+      <p class="muted">Optional. Skip what you don't need; you can edit tokens any time from Settings → Sources.</p>
+
+      <div id="source-tokens-list" class="token-list"></div>
+
+      <div class="row">
+        <button type="button" class="secondary" id="add-token-row">+ Add another hostname</button>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="secondary" data-go="3">Back</button>
+        <div class="row">
+          <button type="button" class="secondary" id="skip-tokens">Skip</button>
+          <button type="button" class="primary" id="step4-next">Save and continue</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 5: Done -->
+    <section class="step" data-step="5" hidden>
+      <h2>You're set up</h2>
+      <ul class="checks">
+        <li>Connected to <strong id="done-instance"></strong></li>
+        <li>Default destination owner: <strong id="done-owner"></strong></li>
+      </ul>
+      <p>Try it out: open a repository on GitHub, GitLab, Codeberg, gitea.com, or Bitbucket Cloud, then click the toolbar icon — or right-click anywhere on the page and choose <em>Fork to <span id="done-backend"></span></em>.</p>
+      <p class="muted">Want custom self-hosted source hostnames, source-side credentials for private repos, or default mirror/visibility? Visit the full settings page.</p>
+      <div class="actions">
+        <button type="button" class="secondary" id="open-options">Open settings</button>
+        <button type="button" class="primary" id="finish">Done</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="welcome.js"></script>
+</body>
+</html>
