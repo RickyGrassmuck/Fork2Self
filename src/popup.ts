@@ -348,6 +348,9 @@ function renderHistoryItem(r: MigrationRecord): HTMLElement {
     link.className = "history-link";
     card.appendChild(link);
   } else if (r.status === "failed" && r.error) {
+    // TODO: When the destination wasn't auto-cleaned up (Gitea only does
+    // this for rate-limit failures today), surface a "Delete repo" button
+    // on the history item that calls the backend's delete API.
     const err = document.createElement("div");
     err.className = "history-error";
     err.textContent = r.error;
