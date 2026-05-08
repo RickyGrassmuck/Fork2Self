@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fork2Self — The Firefox extension nobody asked for</title>
-<meta name="description" content="A Firefox extension that forks any repo into your self-hosted Git instance. Written entirely by an LLM. The human just typed the prompts.">
+<title>Fork2Self — Mirror any Git repo into your self-hosted instance</title>
+<meta name="description" content="A Firefox extension that forks GitHub, GitLab, Gitea/Forgejo, Gogs, OneDev, GitBucket, and Bitbucket Cloud repositories into a self-hosted Git server you control.">
 <style>
   :root {
     --bg: #0b0b16;
@@ -13,9 +13,7 @@
     --fg-dim: #9a9ac4;
     --accent: #a48cff;
     --accent-2: #5dd4ff;
-    --pink: #ff7ac6;
     --green: #5dffaa;
-    --warn: #ffd166;
     --card: rgba(255,255,255,0.04);
     --border: rgba(255,255,255,0.08);
     --gradient: linear-gradient(135deg, #a48cff 0%, #5dd4ff 50%, #5dffaa 100%);
@@ -58,23 +56,12 @@
     font-size: 0.92em;
   }
 
-  /* Layout */
   main, header, footer { padding: 0 6vw; max-width: 1100px; margin: 0 auto; }
   section { padding: 5rem 0; border-top: 1px solid var(--border); }
   header { padding-top: 2rem; padding-bottom: 1rem; }
 
-  /* Nav */
-  .nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-  }
-  .nav .brand {
-    font-weight: 700;
-    font-size: 1.1rem;
-    letter-spacing: -0.01em;
-  }
+  .nav { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+  .nav .brand { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em; }
   .nav .brand .logo {
     display: inline-block;
     background: var(--gradient);
@@ -86,12 +73,7 @@
   .nav .links a { color: var(--fg-dim); }
   .nav .links a:hover { color: var(--fg); text-decoration: none; }
 
-  /* Hero */
-  .hero {
-    padding: 6rem 0 4rem;
-    border-top: 0;
-    text-align: center;
-  }
+  .hero { padding: 6rem 0 4rem; border-top: 0; text-align: center; }
   .hero .eyebrow {
     display: inline-block;
     border: 1px solid var(--border);
@@ -132,12 +114,7 @@
     max-width: 38em;
     margin: 0 auto 2.5rem;
   }
-  .hero .cta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    justify-content: center;
-  }
+  .hero .cta { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
   .btn {
     display: inline-flex;
     align-items: center;
@@ -152,72 +129,18 @@
     transition: transform 0.15s ease, background 0.15s ease;
   }
   .btn:hover { transform: translateY(-1px); text-decoration: none; }
-  .btn.primary {
-    background: var(--gradient);
-    color: #0b0b16;
-    border-color: transparent;
-  }
+  .btn.primary { background: var(--gradient); color: #0b0b16; border-color: transparent; }
   .btn.primary:hover { box-shadow: 0 8px 30px rgba(164,140,255,0.35); }
 
-  .disclaimer {
-    margin-top: 2.5rem;
-    color: var(--warn);
-    font-size: 0.92rem;
-    background: rgba(255,209,102,0.06);
-    border: 1px dashed rgba(255,209,102,0.4);
-    padding: 0.8em 1.2em;
-    border-radius: 10px;
-    display: inline-block;
-    max-width: 600px;
-  }
-
-  /* Section heads */
   h2 {
     font-size: clamp(1.7rem, 3.5vw, 2.3rem);
     letter-spacing: -0.02em;
     margin: 0 0 1rem;
     font-weight: 800;
   }
-  .section-lede {
-    color: var(--fg-dim);
-    margin: 0 0 3rem;
-    font-size: 1.1rem;
-    max-width: 50em;
-  }
-  h3 {
-    font-size: 1.15rem;
-    margin: 0 0 0.4rem;
-    font-weight: 700;
-  }
+  .section-lede { color: var(--fg-dim); margin: 0 0 3rem; font-size: 1.1rem; max-width: 50em; }
+  h3 { font-size: 1.15rem; margin: 0 0 0.4rem; font-weight: 700; }
 
-  /* Stats */
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-  }
-  .stat {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.6rem 1.4rem;
-  }
-  .stat .num {
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    font-weight: 800;
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    line-height: 1;
-    margin-bottom: 0.4rem;
-  }
-  .stat .label {
-    color: var(--fg-dim);
-    font-size: 0.95rem;
-  }
-
-  /* Feature grid */
   .features {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -230,21 +153,38 @@
     padding: 1.6rem;
     transition: border-color 0.2s ease, transform 0.2s ease;
   }
-  .feature:hover {
-    border-color: rgba(164,140,255,0.5);
-    transform: translateY(-2px);
-  }
-  .feature .icon {
-    font-size: 1.8rem;
-    margin-bottom: 0.6rem;
-    display: block;
-  }
-  .feature p {
-    color: var(--fg-dim);
-    margin: 0;
-  }
+  .feature:hover { border-color: rgba(164,140,255,0.5); transform: translateY(-2px); }
+  .feature .icon { font-size: 1.8rem; margin-bottom: 0.6rem; display: block; }
+  .feature p { color: var(--fg-dim); margin: 0; }
 
-  /* How */
+  .matrix {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    font-size: 0.95rem;
+  }
+  .matrix caption {
+    text-align: left;
+    padding: 1rem 1.2rem 0.4rem;
+    color: var(--fg-dim);
+    font-size: 0.95rem;
+  }
+  .matrix th, .matrix td {
+    padding: 0.7rem 0.9rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+  .matrix th { font-weight: 600; color: var(--fg-dim); background: rgba(255,255,255,0.02); }
+  .matrix th:first-child, .matrix td:first-child { text-align: left; font-weight: 600; }
+  .matrix .y { color: var(--green); }
+  .matrix .n { color: var(--fg-dim); opacity: 0.4; }
+
+  .matrices { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+  @media (min-width: 900px) { .matrices { grid-template-columns: 3fr 2fr; } }
+
   .how {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -277,30 +217,6 @@
   }
   .step p { color: var(--fg-dim); margin: 0; }
 
-  /* Testimonials */
-  .testimonials {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.2rem;
-  }
-  .quote {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.6rem;
-  }
-  .quote blockquote {
-    margin: 0 0 1rem;
-    font-style: italic;
-    color: var(--fg);
-  }
-  .quote .author {
-    color: var(--fg-dim);
-    font-size: 0.9rem;
-  }
-  .quote .author strong { color: var(--fg); font-style: normal; font-weight: 600; }
-
-  /* FAQ */
   details {
     background: var(--card);
     border: 1px solid var(--border);
@@ -328,7 +244,6 @@
   details[open] summary::after { transform: rotate(45deg); }
   details p { color: var(--fg-dim); margin: 0.8rem 0 0; }
 
-  /* Install block */
   .install {
     background: var(--card);
     border: 1px solid var(--border);
@@ -337,7 +252,24 @@
   }
   .install pre { margin: 0; }
 
-  /* Footer */
+  .perms {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    font-size: 0.95rem;
+  }
+  .perms th, .perms td {
+    padding: 0.8rem 1rem;
+    text-align: left;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .perms th { font-weight: 600; color: var(--fg-dim); background: rgba(255,255,255,0.02); }
+  .perms td:first-child { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; color: var(--accent-2); }
+
   footer {
     padding-top: 3rem;
     padding-bottom: 3rem;
@@ -346,11 +278,7 @@
     border-top: 1px solid var(--border);
     margin-top: 4rem;
   }
-  footer .colophon {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    opacity: 0.7;
-  }
+  footer .colophon { margin-top: 0.6rem; font-size: 0.85rem; opacity: 0.7; }
 </style>
 </head>
 <body>
@@ -362,6 +290,7 @@
     </div>
     <div class="links">
       <a href="#features">Features</a>
+      <a href="#support">Support</a>
       <a href="#how">How</a>
       <a href="#install">Install</a>
       <a href="#faq">FAQ</a>
@@ -372,202 +301,222 @@
 <main>
 
 <section class="hero">
-  <div class="eyebrow"><span class="pulse"></span>Now with 100% more autocomplete</div>
-  <h1>Fork repos into <span class="gradient">your own</span> Git server.<br>One click. Zero ceremony.</h1>
+  <div class="eyebrow"><span class="pulse"></span>Firefox extension</div>
+  <h1>Fork repos into <span class="gradient">your own</span> Git server. One click.</h1>
   <p class="lede">
-    Fork2Self is a Firefox extension that mirrors any GitHub, GitLab, Gitea, Forgejo, or Bitbucket repo into a self-hosted instance you actually control. Because <em>"someone else's computer"</em> is also a fine description of every Git host that isn't yours.
+    Fork2Self mirrors repositories from GitHub, GitLab, Gitea, Forgejo, Gogs, OneDev, GitBucket, and Bitbucket Cloud into a self-hosted Git instance you control. Run it from the toolbar popup or the right-click context menu.
   </p>
   <div class="cta">
-    <a href="#install" class="btn primary">Get it →</a>
+    <a href="#install" class="btn primary">Install →</a>
     <a href="https://git.ladon-cloud.ts.net/joyrida/Fork2Self" class="btn">Source</a>
-  </div>
-  <p class="disclaimer">
-    ⚠️ Full disclosure: every line of code, every commit message, every word on this page, and the snide tone of this very disclaimer were written by an LLM. The human in this operation typed prompts and pressed Enter. A lot.
-  </p>
-</section>
-
-<section id="stats">
-  <h2>Some numbers we have</h2>
-  <p class="section-lede">
-    These are real metrics. We're not making them up. We're just choosing the ones that sound impressive — which, to be fair, is also what every other product page does.
-  </p>
-  <div class="stats">
-    <div class="stat">
-      <div class="num">4,812</div>
-      <div class="label">lines of TypeScript hallucinated into existence</div>
-    </div>
-    <div class="stat">
-      <div class="num">0</div>
-      <div class="label">human-authored lines of source code</div>
-    </div>
-    <div class="stat">
-      <div class="num">5</div>
-      <div class="label">supported source platforms</div>
-    </div>
-    <div class="stat">
-      <div class="num">2</div>
-      <div class="label">supported destination backends</div>
-    </div>
-    <div class="stat">
-      <div class="num">∞</div>
-      <div class="label">em-dashes per paragraph</div>
-    </div>
-    <div class="stat">
-      <div class="num">100%</div>
-      <div class="label">of design decisions made by next-token prediction</div>
-    </div>
   </div>
 </section>
 
 <section id="features">
-  <h2>Features that we are obligated to list</h2>
+  <h2>Features</h2>
   <p class="section-lede">
-    Each of these took roughly one prompt to specify and zero meetings to align on. Disrupting the SDLC, if you will.
+    Built around the migration APIs the destination forge already provides — no proxying through a third party.
   </p>
   <div class="features">
     <div class="feature">
       <span class="icon">🍴</span>
-      <h3>One-click forks</h3>
-      <p>Click the toolbar button. Or right-click. We added a context menu because someone (the LLM) thought of it.</p>
+      <h3>One-click forking</h3>
+      <p>Toolbar popup on any recognized repo page, plus a "Fork to…" context-menu action on links and pages.</p>
     </div>
     <div class="feature">
       <span class="icon">🌐</span>
       <h3>Multiple destinations</h3>
-      <p>Configure as many self-hosted Gitea, Forgejo, or GitLab instances as you can stomach. One is the default. The rest live in a submenu, like neglected tabs.</p>
+      <p>Configure several self-hosted instances; one is the default for one-click flows. Others appear in a submenu.</p>
     </div>
     <div class="feature">
       <span class="icon">🪞</span>
-      <h3>Pull-mirror mode</h3>
-      <p>Optionally keep your fork in sync with upstream forever. Truly, the most committed relationship you'll have this year.</p>
+      <h3>Pull-mirror or snapshot</h3>
+      <p>Optional pull-mirror keeps the destination in sync with upstream on backends that support it (Gitea/Forgejo).</p>
     </div>
     <div class="feature">
       <span class="icon">🎫</span>
-      <h3>Issues, PRs, releases, wikis</h3>
-      <p>Migrate the whole soap opera, not just the code. Subject to what the source and destination can both agree on, like adults.</p>
+      <h3>Optional content migration</h3>
+      <p>Wiki, issues, labels, pull requests, releases, milestones — toggled per fork by what the source and destination both support.</p>
     </div>
     <div class="feature">
       <span class="icon">🔐</span>
-      <h3>Private repo support</h3>
-      <p>Per-host source tokens are stored locally in your browser. No telemetry, no analytics, no "anonymous usage signals." We genuinely cannot be bothered.</p>
+      <h3>Private source repos</h3>
+      <p>Per-source-host personal access tokens are used during clone. Tokens are stored only in the browser's local extension storage.</p>
     </div>
     <div class="feature">
       <span class="icon">🧭</span>
       <h3>Custom hostname mapping</h3>
-      <p>Have a self-hosted GitLab at <code>git.your-bunker.lan</code>? Tell the extension it's a GitLab and it'll work. We don't ask questions.</p>
+      <p>Map an internal hostname (e.g. <code>git.example.lan</code>) to GitHub/GitLab/Gitea/Gogs/OneDev/GitBucket so the popup and context menu work on it.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🗂️</span>
+      <h3>Migration history</h3>
+      <p>The popup keeps the last 50 migration attempts with their status, error, and a quick link to the resulting repo.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🧹</span>
+      <h3>Cleanup on failure</h3>
+      <p>Rate-limited migrations on Gitea are auto-cleaned up. Other failures expose a manual "Delete repo" action on the failed history item.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🛡️</span>
+      <h3>Local-only data</h3>
+      <p>No telemetry, no analytics, no remote configuration. The extension talks only to the source repo and the destination you configure.</p>
     </div>
   </div>
+</section>
+
+<section id="support">
+  <h2>Supported sources & destinations</h2>
+  <p class="section-lede">
+    The matrix below shows what each source can hand off to a destination that supports the same content type. Effective capability is the intersection — both sides must agree.
+  </p>
+  <div class="matrices">
+    <table class="matrix">
+      <caption>Sources — what can be migrated <em>from</em></caption>
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th>Code</th>
+          <th>Wiki</th>
+          <th>Issues</th>
+          <th>PRs</th>
+          <th>Labels</th>
+          <th>Releases</th>
+          <th>Milestones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>GitHub</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>GitLab</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>Gitea / Forgejo</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>Gogs</td><td class="y">✓</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td><td class="y">✓</td></tr>
+        <tr><td>OneDev</td><td class="y">✓</td><td class="n">—</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="n">—</td><td class="y">✓</td></tr>
+        <tr><td>GitBucket</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>Bitbucket Cloud</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+        <tr><td>Generic Git URL</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+      </tbody>
+    </table>
+    <table class="matrix">
+      <caption>Destinations — what can be migrated <em>to</em></caption>
+      <thead>
+        <tr><th>Destination</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Gitea / Forgejo</td>
+          <td style="text-align:left">Full content migration via <code>POST /api/v1/repos/migrate</code>. Pull-mirror supported.</td>
+        </tr>
+        <tr>
+          <td>GitLab CE / EE</td>
+          <td style="text-align:left">Code-only via <code>import_url</code>. Pull-mirror is GitLab EE only.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="section-lede" style="margin-top: 1.5rem;">
+    Bitbucket and Generic Git sources clone code only via Gitea's <code>service=git</code> importer. Gogs, OneDev, and GitBucket use Gitea's dedicated downloaders and require Gitea/Forgejo recent enough to ship them — Gitea 1.16+ for OneDev, 1.20+ for GitBucket.
+  </p>
 </section>
 
 <section id="how">
   <h2>How it works</h2>
-  <p class="section-lede">
-    A three-step process, much like every onboarding flow ever shipped, but this one is real.
-  </p>
   <div class="how">
     <div class="step">
       <h3>Configure a destination</h3>
-      <p>Point it at your self-hosted Git instance and paste a personal access token. Test the connection. Be quietly proud of yourself.</p>
+      <p>Open the options page, add a Gitea/Forgejo or GitLab instance, and paste a personal access token. The extension requests host permission for that origin only when you grant it.</p>
     </div>
     <div class="step">
-      <h3>Open a repo page</h3>
-      <p>GitHub, GitLab, Gitea, Forgejo, Codeberg, Bitbucket — anywhere with a recognizable repo URL. The extension does the parsing.</p>
+      <h3>Open a recognized repo page</h3>
+      <p>GitHub, GitLab, Gitea, Forgejo, Codeberg, Bitbucket Cloud, or any host you've mapped via the custom-hostname setting.</p>
     </div>
     <div class="step">
-      <h3>Click "Fork"</h3>
-      <p>Wait a few seconds. Your destination clones the repo (and optionally the issues, PRs, wiki, and so on). Done.</p>
+      <h3>Click Fork</h3>
+      <p>The destination forge pulls the source over its native migration API. Progress and result land in the popup's History tab.</p>
     </div>
   </div>
 </section>
 
-<section id="install" class="install-section">
+<section id="install">
   <h2>Install</h2>
   <p class="section-lede">
-    The extension isn't on AMO yet because the human running this project hasn't gotten around to it. You have options.
+    The extension is not yet listed on AMO. Build from source or grab a CI artifact.
   </p>
   <div class="install">
-    <h3>Option 1 — Build it yourself</h3>
+    <h3>Build from source</h3>
     <pre><code>git clone https://git.ladon-cloud.ts.net/joyrida/Fork2Self
 cd Fork2Self
 bun install
 bun run package
 # fork2self-X.Y.Z.xpi appears at the repo root</code></pre>
-    <p style="margin-top: 1.5rem;">Then in Firefox: <code>about:debugging</code> → <em>This Firefox</em> → <em>Load Temporary Add-on…</em> → pick <code>dist/manifest.json</code>.</p>
+    <p style="margin-top: 1.5rem;">In Firefox: <code>about:debugging</code> → <em>This Firefox</em> → <em>Load Temporary Add-on…</em> → pick <code>dist/manifest.json</code>.</p>
 
-    <h3 style="margin-top: 2rem;">Option 2 — Run the CI workflow</h3>
-    <p>The repo has a Gitea Actions workflow that builds, lints, signs (via <code>web-ext</code>), and uploads an artifact. It's gated to manual runs only, because nobody needs a CI bill from a hobby project.</p>
-
-    <h3 style="margin-top: 2rem;">Option 3 — Wait</h3>
-    <p>If a signed XPI appears on a release page somewhere, that was probably a future version of this project being slightly more responsible. Check the <a href="https://git.ladon-cloud.ts.net/joyrida/Fork2Self">repo</a>.</p>
+    <h3 style="margin-top: 2rem;">Use the CI workflow</h3>
+    <p>The repo includes a Gitea Actions workflow that builds, lints with <code>web-ext lint</code>, signs via <code>web-ext sign</code>, and uploads the signed XPI as an artifact. Triggered manually.</p>
   </div>
 </section>
 
-<section id="testimonials">
-  <h2>What people are saying</h2>
+<section id="permissions">
+  <h2>Permissions</h2>
   <p class="section-lede">
-    These quotes were also generated by an LLM. The personas are fictional. Any resemblance to real reviewers, living or dead, is a coincidence — and frankly, suspicious.
+    Manifest permissions and what they're used for. <code>host_permissions</code> is empty by default — destination origins are granted on demand from the settings flow.
   </p>
-  <div class="testimonials">
-    <div class="quote">
-      <blockquote>"I asked it to fork a repo and it forked the repo. I'm not sure what else I expected, but it delivered."</blockquote>
-      <div class="author"><strong>A. Persona</strong> — Senior Imaginary Developer</div>
-    </div>
-    <div class="quote">
-      <blockquote>"Finally, an extension whose marketing page is more transparent about its origins than my last three coworkers' LinkedIn posts."</blockquote>
-      <div class="author"><strong>B. Stand-In</strong> — DevOps Engineer, Plausibly Real</div>
-    </div>
-    <div class="quote">
-      <blockquote>"It does one thing. It does it well. And nobody is trying to upsell me a B2B SaaS dashboard. Five stars."</blockquote>
-      <div class="author"><strong>C. Composite</strong> — Self-Hosting Enthusiast</div>
-    </div>
-  </div>
+  <table class="perms">
+    <thead><tr><th>Permission</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>storage</td><td>Persist destinations, source tokens, and migration history in the browser's local extension storage.</td></tr>
+      <tr><td>contextMenus</td><td>Provide the "Fork to…" right-click action on pages and links.</td></tr>
+      <tr><td>notifications</td><td>Toast notifications on fork start, success, and failure.</td></tr>
+      <tr><td>activeTab</td><td>Read the URL of the tab the user clicks the action on, to detect the source repo.</td></tr>
+      <tr><td>optional_host_permissions</td><td>Granted per-origin when you add or test a destination, so the extension can reach its API.</td></tr>
+    </tbody>
+  </table>
 </section>
 
 <section id="faq">
   <h2>FAQ</h2>
-  <p class="section-lede">
-    Anticipated questions. Some of them rhetorical.
-  </p>
 
   <details>
-    <summary>Did an AI really write all of this?</summary>
-    <p>Yes. The TypeScript, the build pipeline, the README, the Gitea workflow, the Taskfile, this homepage — including this very FAQ entry confirming that an AI wrote everything. The recursion is intentional.</p>
+    <summary>Does it send any data to a third party?</summary>
+    <p>No. Network calls go only to the source repo (for cloning) and the destination forge (for the migration API). The manifest declares <code>data_collection_permissions: ["none"]</code> and there is no analytics SDK in the dependencies.</p>
   </details>
 
   <details>
-    <summary>Is the code any good?</summary>
-    <p>It typechecks under <code>--strict</code>, lints clean with <code>web-ext lint</code> (zero warnings), and survived a security review. Make of that what you will.</p>
-  </details>
-
-  <details>
-    <summary>Why "Fork2Self"?</summary>
-    <p>Because "fork yourself" is funnier in a directory listing than as a command-line invocation, and because every other name was already taken on npm.</p>
-  </details>
-
-  <details>
-    <summary>Does it phone home?</summary>
-    <p>No. The manifest declares <code>data_collection_permissions: ["none"]</code>, the only network calls are to your configured destination and the source you're forking from, and there is no analytics SDK lurking in the dependencies. We don't even know you're using it. We can't.</p>
+    <summary>Where are tokens stored?</summary>
+    <p>In the browser's local extension storage (<code>browser.storage.local</code>). Tokens are not synced to a Mozilla account and are never transmitted anywhere except to the destination or source they belong to.</p>
   </details>
 
   <details>
     <summary>Why Firefox only?</summary>
-    <p>Manifest V3 portability across browsers is, charitably, a saga. Adding Chrome support is left as an exercise for whoever forks this repo into their self-hosted Git instance using the extension itself.</p>
+    <p>The extension targets Manifest V3 with the <code>browser.*</code> namespace and Firefox's extension permission model. A Chromium port is feasible but not yet implemented.</p>
   </details>
 
   <details>
-    <summary>Why is the homepage trying so hard?</summary>
-    <p>Snark was explicitly requested. Blame the prompt, not the model.</p>
+    <summary>Does it work on private source repos?</summary>
+    <p>Yes, when the source supports token-based HTTP cloning. Add a per-host source token in settings and the extension will embed it during the clone request. Bitbucket Cloud requires username + app password, which this extension doesn't currently support.</p>
+  </details>
+
+  <details>
+    <summary>What happens if a migration fails?</summary>
+    <p>The failed migration shows up in the History tab with the error message. On Gitea, rate-limit failures trigger automatic cleanup of any partial repo. For other failures, a "Delete repo" action on the history item calls the destination's delete API.</p>
+  </details>
+
+  <details>
+    <summary>Can I add support for another source or destination?</summary>
+    <p>Sources and backends self-register with a small interface (<code>src/sources/*.ts</code>, <code>src/backends/*.ts</code>). Each new platform is a single file plus an import in its <code>index.ts</code>. See the existing implementations for the contract.</p>
+  </details>
+
+  <details>
+    <summary>License?</summary>
+    <p>GPL-3.0-or-later.</p>
   </details>
 </section>
 
 </main>
 
 <footer>
-  <p>
-    Made by Claude. Reviewed by Claude. Refactored by Claude. Linted by Claude. Shipped by a human who pressed <kbd>Enter</kbd> with conviction.
-  </p>
-  <p class="colophon">
-    No tracking. No cookies. No <em>"we value your privacy"</em> dialog. Just a static HTML file you can read the source of.
-  </p>
+  <p>Source on <a href="https://git.ladon-cloud.ts.net/joyrida/Fork2Self">git.ladon-cloud.ts.net</a>. Released under GPL-3.0-or-later.</p>
+  <p class="colophon">Static page. No tracking, no cookies.</p>
 </footer>
 
 </body>

@@ -4,6 +4,7 @@ import type {
   BackendConfig,
   BackendInstance,
   Capabilities,
+  DeleteOutcome,
   MigrateOptions,
   MigrateResult,
   Repo,
@@ -87,15 +88,20 @@ export class GiteaBackend implements BackendInstance {
       // creates the repo entry, clones, then fails when fetching issues/PRs.
       // Try to delete it so the user isn't left with a half-imported repo.
       let suffix = "";
+      let cleanedUp: boolean | undefined;
       if (this.isRateLimitError(res.status, body)) {
         const outcome = await this.deleteRepo(options.owner, options.repoName);
-        suffix = outcome === "deleted"
-          ? ` — cleaned up partial repo ${options.owner}/${options.repoName}.`
-          : outcome === "absent"
-            ? "" // nothing was created, nothing to clean
-            : ` — could not clean up ${options.owner}/${options.repoName}, please remove it manually.`;
+        if (outcome === "deleted") {
+          suffix = ` — cleaned up partial repo ${options.owner}/${options.repoName}.`;
+          cleanedUp = true;
+        } else if (outcome === "absent") {
+          cleanedUp = true; // nothing was created, nothing to clean
+        } else {
+          suffix = ` — could not clean up ${options.owner}/${options.repoName}, please remove it manually.`;
+          cleanedUp = false;
+        }
       }
-      throw this.makeError(res, body, suffix);
+      throw this.makeError(res, body, suffix, cleanedUp);
     }
     const body = await res.json() as GiteaRepo;
     return {
@@ -105,9 +111,10 @@ export class GiteaBackend implements BackendInstance {
   }
 
   // Returns "deleted" if the repo was removed, "absent" if it never existed
-  // (404), and "failed" otherwise. Errors are swallowed; the caller already
-  // has a primary error to surface.
-  private async deleteRepo(owner: string, repo: string): Promise<"deleted" | "absent" | "failed"> {
+  // (404), and "failed" otherwise. Errors are swallowed; auto-cleanup
+  // callers already have a primary error to surface, and manual-cleanup
+  // callers act on the outcome value.
+  async deleteRepo(owner: string, repo: string): Promise<DeleteOutcome> {
     try {
       const url = `${this.baseUrl}/api/v1/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
       const res = await fetch(url, { method: "DELETE", headers: this.headers() });
@@ -140,10 +147,16 @@ export class GiteaBackend implements BackendInstance {
     }
   }
 
-  private makeError(res: Response, body: GiteaError | null, suffix = ""): Error & { status?: number } {
+  private makeError(
+    res: Response,
+    body: GiteaError | null,
+    suffix = "",
+    cleanedUp?: boolean,
+  ): Error & { status?: number; cleanedUp?: boolean } {
     const base = (body && body.message) ? body.message : `HTTP ${res.status} ${res.statusText}`;
-    const err: Error & { status?: number } = new Error(base + suffix);
+    const err: Error & { status?: number; cleanedUp?: boolean } = new Error(base + suffix);
     err.status = res.status;
+    if (cleanedUp !== undefined) err.cleanedUp = cleanedUp;
     return err;
   }
 

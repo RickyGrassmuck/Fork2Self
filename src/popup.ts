@@ -20,6 +20,8 @@ import {
   type AppConfig,
   type BackendClass,
   type BackendDefaults,
+  type DeleteRepoRequest,
+  type DeleteRepoResponse,
   type Destination,
   type ForkRequest,
   type ForkResponse,
@@ -348,13 +350,11 @@ function renderHistoryItem(r: MigrationRecord): HTMLElement {
     link.className = "history-link";
     card.appendChild(link);
   } else if (r.status === "failed" && r.error) {
-    // TODO: When the destination wasn't auto-cleaned up (Gitea only does
-    // this for rate-limit failures today), surface a "Delete repo" button
-    // on the history item that calls the backend's delete API.
     const err = document.createElement("div");
     err.className = "history-error";
     err.textContent = r.error;
     card.appendChild(err);
+    if (!r.cleanedUp) card.appendChild(renderDeleteRepoControl(r));
   } else if (r.status === "pending") {
     const pending = document.createElement("div");
     pending.className = "history-arrow";
@@ -363,6 +363,57 @@ function renderHistoryItem(r: MigrationRecord): HTMLElement {
   }
 
   return card;
+}
+
+function renderDeleteRepoControl(r: MigrationRecord): HTMLElement {
+  const wrap = document.createElement("div");
+  wrap.className = "history-cleanup";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "link";
+  button.textContent = `Delete ${r.destination.owner}/${r.destination.repoName} on ${r.destination.destinationName}`;
+
+  const status = document.createElement("span");
+  status.className = "history-cleanup-status";
+
+  button.addEventListener("click", () => {
+    if (!confirm(
+      `Delete ${r.destination.owner}/${r.destination.repoName} on ${r.destination.destinationName}?\n\n`
+      + "This calls the destination's delete API and cannot be undone.",
+    )) return;
+    button.disabled = true;
+    status.textContent = "Deleting…";
+    status.className = "history-cleanup-status";
+    void requestDeleteRepo(r.id).then((resp) => {
+      if (resp.ok) {
+        // Storage update will trigger a re-render and remove this control;
+        // surface a brief acknowledgement until then.
+        status.textContent = resp.outcome === "absent" ? "Already gone." : "Deleted.";
+        status.className = "history-cleanup-status success";
+      } else {
+        status.textContent = resp.error;
+        status.className = "history-cleanup-status error";
+        button.disabled = false;
+      }
+    });
+  });
+
+  wrap.appendChild(button);
+  wrap.appendChild(status);
+  return wrap;
+}
+
+async function requestDeleteRepo(migrationId: string): Promise<DeleteRepoResponse> {
+  const request: DeleteRepoRequest = { type: "deleteRepo", migrationId };
+  try {
+    const raw = await browser.runtime.sendMessage(request);
+    const resp = raw as DeleteRepoResponse | undefined;
+    if (!resp) return { ok: false, error: "No response from background." };
+    return resp;
+  } catch (err) {
+    return { ok: false, error: (err as Error).message || "Delete failed." };
+  }
 }
 
 function formatTime(ms: number): string {

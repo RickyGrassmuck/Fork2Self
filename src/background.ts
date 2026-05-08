@@ -10,6 +10,7 @@ import {
   getDestinationById,
   knownSourceHostnames,
   loadConfig,
+  loadMigrations,
   lookupSourceToken,
   registry,
   safeHttpUrl,
@@ -18,6 +19,8 @@ import {
   updateMigration,
 } from "./core.js";
 import type {
+  DeleteRepoRequest,
+  DeleteRepoResponse,
   Destination,
   ForkRequest,
   ForkResponse,
@@ -100,21 +103,35 @@ async function openPopupIfSupported(): Promise<void> {
 }
 
 browser.runtime.onMessage.addListener((msg: unknown, _sender, sendResponse) => {
-  if (!isForkRequest(msg)) return false;
-  runFork(msg.sourceId, msg.destinationId, msg.repo, msg.overrides || {})
-    .then((result) => {
-      const response: ForkResponse = { ok: true, result };
-      sendResponse(response);
-    })
-    .catch((err: Error & { status?: number }) => {
-      const response: ForkResponse = {
-        ok: false,
-        error: err.message,
-        ...(err.status !== undefined ? { status: err.status } : {}),
-      };
-      sendResponse(response);
-    });
-  return true;
+  if (isForkRequest(msg)) {
+    runFork(msg.sourceId, msg.destinationId, msg.repo, msg.overrides || {})
+      .then((result) => {
+        const response: ForkResponse = { ok: true, result };
+        sendResponse(response);
+      })
+      .catch((err: Error & { status?: number }) => {
+        const response: ForkResponse = {
+          ok: false,
+          error: err.message,
+          ...(err.status !== undefined ? { status: err.status } : {}),
+        };
+        sendResponse(response);
+      });
+    return true;
+  }
+  if (isDeleteRepoRequest(msg)) {
+    runDeleteRepo(msg.migrationId)
+      .then((outcome) => {
+        const response: DeleteRepoResponse = { ok: true, outcome };
+        sendResponse(response);
+      })
+      .catch((err: Error) => {
+        const response: DeleteRepoResponse = { ok: false, error: err.message };
+        sendResponse(response);
+      });
+    return true;
+  }
+  return false;
 });
 
 function isForkRequest(msg: unknown): msg is ForkRequest {
@@ -129,6 +146,12 @@ function isForkRequest(msg: unknown): msg is ForkRequest {
     && typeof r.repo === "string"
     && typeof r.cloneUrl === "string"
     && typeof r.htmlUrl === "string";
+}
+
+function isDeleteRepoRequest(msg: unknown): msg is DeleteRepoRequest {
+  if (!msg || typeof msg !== "object") return false;
+  const m = msg as Partial<DeleteRepoRequest>;
+  return m.type === "deleteRepo" && typeof m.migrationId === "string" && !!m.migrationId;
 }
 
 async function runFork(
@@ -232,15 +255,43 @@ async function runFork(
     }
     return result;
   } catch (err) {
-    const e = err as Error;
+    const e = err as Error & { cleanedUp?: boolean };
     await updateMigration(record.id, {
       status: "failed",
       endedAt: Date.now(),
       error: e.message || "Unknown error",
+      ...(e.cleanedUp !== undefined ? { cleanedUp: e.cleanedUp } : {}),
     });
     notify(`Fork to ${destination.name} — failed`, e.message || "Unknown error");
     throw err;
   }
+}
+
+async function runDeleteRepo(migrationId: string): Promise<"deleted" | "absent"> {
+  const list = await loadMigrations();
+  const record = list.find((r) => r.id === migrationId);
+  if (!record) throw new Error("Migration record not found");
+
+  const cfg = await loadConfig();
+  const destination = getDestinationById(cfg, record.destination.destinationId);
+  if (!destination) {
+    throw new Error("Destination is no longer configured");
+  }
+  const backendKlass = registry.getBackendClass(destination.backendId);
+  if (!backendKlass) {
+    throw new Error(`Unknown backend: ${destination.backendId}`);
+  }
+  if (!destination.config.baseUrl || !destination.config.token) {
+    throw new Error("Destination is not configured");
+  }
+
+  const backend = new backendKlass(destination.config);
+  const outcome = await backend.deleteRepo(record.destination.owner, record.destination.repoName);
+  if (outcome === "failed") {
+    throw new Error("Delete request failed; please remove the repo manually.");
+  }
+  await updateMigration(record.id, { cleanedUp: true });
+  return outcome;
 }
 
 async function rebuildContextMenus(): Promise<void> {

@@ -131,7 +131,10 @@ export interface SourceClass {
 export interface BackendInstance {
   whoami(): Promise<UserInfo>;
   migrate(source: Repo, options: MigrateOptions): Promise<MigrateResult>;
+  deleteRepo(owner: string, repo: string): Promise<DeleteOutcome>;
 }
+
+export type DeleteOutcome = "deleted" | "absent" | "failed";
 
 export interface BackendClass {
   readonly id: string;
@@ -150,6 +153,10 @@ export interface MigrationRecord {
   endedAt?: number;
   status: "pending" | "success" | "failed";
   error?: string;
+  // Set when the destination repo has been removed — either by auto-cleanup
+  // after a failure, or by a later manual "Delete repo" action. When unset
+  // on a failed record, the popup offers a manual cleanup button.
+  cleanedUp?: boolean;
   source: {
     id: string;
     label: string;
@@ -181,3 +188,12 @@ export interface ForkRequest {
 export type ForkResponse =
   | { ok: true; result: MigrateResult }
   | { ok: false; error: string; status?: number };
+
+export interface DeleteRepoRequest {
+  type: "deleteRepo";
+  migrationId: string;
+}
+
+export type DeleteRepoResponse =
+  | { ok: true; outcome: DeleteOutcome }
+  | { ok: false; error: string };

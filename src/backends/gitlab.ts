@@ -4,6 +4,7 @@ import type {
   BackendConfig,
   BackendInstance,
   Capabilities,
+  DeleteOutcome,
   MigrateOptions,
   MigrateResult,
   Repo,
@@ -112,6 +113,25 @@ export class GitLabBackend implements BackendInstance {
       fullName: body.path_with_namespace || `${owner}/${options.repoName}`,
       htmlUrl: body.web_url || "",
     };
+  }
+
+  // GitLab accepts the URL-encoded "namespace/project" path as the project
+  // id on DELETE /api/v4/projects/:id. The deletion may be soft (queued for
+  // permanent removal) on EE instances, but from the user's perspective the
+  // project is gone immediately.
+  async deleteRepo(owner: string, repo: string): Promise<DeleteOutcome> {
+    try {
+      const id = encodeURIComponent(`${owner}/${repo}`);
+      const res = await fetch(`${this.baseUrl}/api/v4/projects/${id}`, {
+        method: "DELETE",
+        headers: this.headers(),
+      });
+      if (res.ok || res.status === 202) return "deleted";
+      if (res.status === 404) return "absent";
+      return "failed";
+    } catch {
+      return "failed";
+    }
   }
 
   private async lookupNamespaceId(name: string): Promise<number | null> {

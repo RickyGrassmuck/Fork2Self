@@ -31,11 +31,16 @@ because you'd rather host it yourself.
 | GitHub            |  ✓   |  ✓   |   ✓    |  ✓  |   ✓    |    ✓     |     ✓      |
 | GitLab            |  ✓   |  ✓   |   ✓    |  ✓  |   ✓    |    ✓     |     ✓      |
 | Gitea / Forgejo   |  ✓   |  ✓   |   ✓    |  ✓  |   ✓    |    ✓     |     ✓      |
+| Gogs              |  ✓   |      |   ✓    |     |   ✓    |          |     ✓      |
+| OneDev            |  ✓   |      |   ✓    |  ✓  |   ✓    |          |     ✓      |
+| GitBucket         |  ✓   |  ✓   |   ✓    |  ✓  |   ✓    |    ✓     |     ✓      |
 | Bitbucket Cloud   |  ✓   |      |        |     |        |          |            |
 | Generic Git URL   |  ✓   |      |        |     |        |          |            |
 
 (Bitbucket and Generic Git URLs are code-only via Gitea's `service=git`
-importer.)
+importer. Gogs, OneDev, and GitBucket use Gitea's dedicated downloaders
+and require a Gitea/Forgejo destination recent enough to ship them — Gitea
+1.16+ for OneDev, 1.20+ for GitBucket.)
 
 ## Supported destinations
 
@@ -175,3 +180,7 @@ import in its `index.ts`.
 
 `host_permissions` is empty by default — the extension only gains access to
 specific destination origins after you grant them in the settings flow.
+
+## License
+
+GPL-3.0-or-later. See [LICENSE](LICENSE).

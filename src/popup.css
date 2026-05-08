@@ -314,6 +314,31 @@ p.muted {
   word-break: break-word;
 }
 
+.history-cleanup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.history-cleanup button.link {
+  color: var(--error);
+}
+
+.history-cleanup button.link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.history-cleanup-status {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.history-cleanup-status.error { color: var(--error); }
+.history-cleanup-status.success { color: var(--success); }
+
 .history-empty {
   color: var(--muted);
   text-align: center;
