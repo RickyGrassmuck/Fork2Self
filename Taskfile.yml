@@ -1,0 +1,103 @@
+# Local task runner for Fork2Self. Install Task: https://taskfile.dev
+#
+# Run `task` (no args) for the list of available tasks.
+
+version: "3"
+
+vars:
+  DIST: dist
+  ARTIFACTS: web-ext-artifacts
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  install:
+    desc: Install npm dependencies (clean, lockfile-respecting)
+    cmds:
+      - npm ci
+
+  typecheck:
+    desc: Run the TypeScript compiler in noEmit mode
+    cmds:
+      - npm run typecheck
+
+  build:
+    desc: Bundle extension sources to dist/
+    cmds:
+      - npm run build
+    sources:
+      - src/**/*
+      - build.mjs
+      - tsconfig.json
+    generates:
+      - "{{.DIST}}/**/*"
+
+  watch:
+    desc: Rebuild on changes (foreground; Ctrl-C to stop)
+    cmds:
+      - npm run watch
+
+  check:
+    desc: Typecheck + build
+    deps: [typecheck, build]
+
+  lint:
+    desc: Validate the built extension with web-ext lint
+    deps: [build]
+    cmds:
+      - npm run lint:ext
+
+  package:
+    desc: Build and produce an unsigned XPI at the repo root
+    cmds:
+      - npm run package
+
+  run:
+    desc: Launch a temporary Firefox with the extension loaded (live reload)
+    deps: [build]
+    cmds:
+      - npx web-ext run --source-dir {{.DIST}}
+
+  sign:
+    desc: Sign the extension via Mozilla AMO (needs WEB_EXT_API_KEY/SECRET)
+    deps: [check, lint]
+    preconditions:
+      - sh: '[ -n "$WEB_EXT_API_KEY" ]'
+        msg: "WEB_EXT_API_KEY is not set. Export it or source .mozilla-creds.env."
+      - sh: '[ -n "$WEB_EXT_API_SECRET" ]'
+        msg: "WEB_EXT_API_SECRET is not set. Export it or source .mozilla-creds.env."
+    cmds:
+      - npm run sign
+
+  ci-build:
+    desc: Reproduce the build.yml CI workflow locally
+    cmds:
+      - task: install
+      - task: typecheck
+      - task: build
+      - task: package
+
+  ci-sign:
+    desc: Reproduce the sign.yml CI workflow locally
+    cmds:
+      - task: install
+      - task: typecheck
+      - task: build
+      - task: lint
+      - task: sign
+
+  clean:
+    desc: Remove build output, packaged XPIs, and signing artifacts
+    cmds:
+      - rm -rf {{.DIST}} {{.ARTIFACTS}}
+      - rm -f *.xpi
+
+  distclean:
+    desc: clean + remove node_modules
+    deps: [clean]
+    cmds:
+      - rm -rf node_modules

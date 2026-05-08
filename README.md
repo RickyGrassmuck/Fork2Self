@@ -84,6 +84,21 @@ npm run watch       # rebuild on changes
 Output lands in `dist/`. Load it as a temporary add-on via
 `about:debugging` for development.
 
+### Taskfile
+
+A `Taskfile.yml` is provided for [Task](https://taskfile.dev) users. Run
+`task` for the full list. Highlights:
+
+```bash
+task check       # typecheck + build
+task run         # launch a temporary Firefox with the extension loaded
+task package     # build + produce an unsigned XPI
+task sign        # build + lint + sign via AMO (needs WEB_EXT_API_*)
+task ci-build    # mirror the build.yml CI workflow locally
+task ci-sign     # mirror the sign.yml CI workflow locally
+task clean       # remove dist/, web-ext-artifacts/, *.xpi
+```
+
 ## Package
 
 ```bash
