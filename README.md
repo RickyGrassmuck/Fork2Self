@@ -135,6 +135,11 @@ You can also sign locally with `npm run sign` if those env vars are set.
 The default channel is `unlisted` (signed XPI for self-distribution, not
 publicly listed on AMO).
 
+## Homepage
+
+A self-contained marketing page lives at `docs/index.html`. Point GitHub
+Pages (or any static host) at the `docs/` directory to serve it.
+
 ## Project layout
 
 ```

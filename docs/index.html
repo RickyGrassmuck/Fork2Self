@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fork2Self — The Firefox extension nobody asked for</title>
+<meta name="description" content="A Firefox extension that forks any repo into your self-hosted Git instance. Written entirely by an LLM. The human just typed the prompts.">
+<style>
+  :root {
+    --bg: #0b0b16;
+    --bg-soft: #14142b;
+    --fg: #ece9ff;
+    --fg-dim: #9a9ac4;
+    --accent: #a48cff;
+    --accent-2: #5dd4ff;
+    --pink: #ff7ac6;
+    --green: #5dffaa;
+    --warn: #ffd166;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --gradient: linear-gradient(135deg, #a48cff 0%, #5dd4ff 50%, #5dffaa 100%);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(800px circle at 10% -10%, rgba(164,140,255,0.18), transparent 50%),
+      radial-gradient(700px circle at 100% 10%, rgba(93,212,255,0.14), transparent 50%),
+      radial-gradient(900px circle at 50% 100%, rgba(255,122,198,0.12), transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+  }
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: rgba(255,255,255,0.06);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    font-size: 0.92em;
+  }
+  pre {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1em 1.2em;
+    overflow-x: auto;
+    font-size: 0.92em;
+  }
+
+  /* Layout */
+  main, header, footer { padding: 0 6vw; max-width: 1100px; margin: 0 auto; }
+  section { padding: 5rem 0; border-top: 1px solid var(--border); }
+  header { padding-top: 2rem; padding-bottom: 1rem; }
+
+  /* Nav */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .nav .brand {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+  }
+  .nav .brand .logo {
+    display: inline-block;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .nav .links { display: flex; gap: 1.5rem; }
+  .nav .links a { color: var(--fg-dim); }
+  .nav .links a:hover { color: var(--fg); text-decoration: none; }
+
+  /* Hero */
+  .hero {
+    padding: 6rem 0 4rem;
+    border-top: 0;
+    text-align: center;
+  }
+  .hero .eyebrow {
+    display: inline-block;
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 0.4em 0.9em;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: var(--fg-dim);
+    margin-bottom: 1.5rem;
+  }
+  .hero .eyebrow .pulse {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--green);
+    margin-right: 0.5em;
+    box-shadow: 0 0 12px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { opacity: 0.4; } }
+  .hero h1 {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin: 0 0 1.5rem;
+    font-weight: 800;
+  }
+  .hero h1 .gradient {
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p.lede {
+    font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+    color: var(--fg-dim);
+    max-width: 38em;
+    margin: 0 auto 2.5rem;
+  }
+  .hero .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.85em 1.4em;
+    border-radius: 10px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--fg);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); text-decoration: none; }
+  .btn.primary {
+    background: var(--gradient);
+    color: #0b0b16;
+    border-color: transparent;
+  }
+  .btn.primary:hover { box-shadow: 0 8px 30px rgba(164,140,255,0.35); }
+
+  .disclaimer {
+    margin-top: 2.5rem;
+    color: var(--warn);
+    font-size: 0.92rem;
+    background: rgba(255,209,102,0.06);
+    border: 1px dashed rgba(255,209,102,0.4);
+    padding: 0.8em 1.2em;
+    border-radius: 10px;
+    display: inline-block;
+    max-width: 600px;
+  }
+
+  /* Section heads */
+  h2 {
+    font-size: clamp(1.7rem, 3.5vw, 2.3rem);
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem;
+    font-weight: 800;
+  }
+  .section-lede {
+    color: var(--fg-dim);
+    margin: 0 0 3rem;
+    font-size: 1.1rem;
+    max-width: 50em;
+  }
+  h3 {
+    font-size: 1.15rem;
+    margin: 0 0 0.4rem;
+    font-weight: 700;
+  }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.6rem 1.4rem;
+  }
+  .stat .num {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .stat .label {
+    color: var(--fg-dim);
+    font-size: 0.95rem;
+  }
+
+  /* Feature grid */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.2rem;
+  }
+  .feature {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.6rem;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .feature:hover {
+    border-color: rgba(164,140,255,0.5);
+    transform: translateY(-2px);
+  }
+  .feature .icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+  .feature p {
+    color: var(--fg-dim);
+    margin: 0;
+  }
+
+  /* How */
+  .how {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.2rem;
+    counter-reset: step;
+  }
+  .step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.6rem;
+    position: relative;
+  }
+  .step::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    top: -1rem;
+    left: -1rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 999px;
+    background: var(--gradient);
+    color: #0b0b16;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+  .step p { color: var(--fg-dim); margin: 0; }
+
+  /* Testimonials */
+  .testimonials {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem;
+  }
+  .quote {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.6rem;
+  }
+  .quote blockquote {
+    margin: 0 0 1rem;
+    font-style: italic;
+    color: var(--fg);
+  }
+  .quote .author {
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+  }
+  .quote .author strong { color: var(--fg); font-style: normal; font-weight: 600; }
+
+  /* FAQ */
+  details {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.6rem;
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after {
+    content: "+";
+    color: var(--accent);
+    font-size: 1.4rem;
+    font-weight: 400;
+    transition: transform 0.2s ease;
+  }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { color: var(--fg-dim); margin: 0.8rem 0 0; }
+
+  /* Install block */
+  .install {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem;
+  }
+  .install pre { margin: 0; }
+
+  /* Footer */
+  footer {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    color: var(--fg-dim);
+    text-align: center;
+    border-top: 1px solid var(--border);
+    margin-top: 4rem;
+  }
+  footer .colophon {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <div class="brand">
+      <span class="logo">⑂</span> Fork2Self
+    </div>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#how">How</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="eyebrow"><span class="pulse"></span>Now with 100% more autocomplete</div>
+  <h1>Fork repos into <span class="gradient">your own</span> Git server.<br>One click. Zero ceremony.</h1>
+  <p class="lede">
+    Fork2Self is a Firefox extension that mirrors any GitHub, GitLab, Gitea, Forgejo, or Bitbucket repo into a self-hosted instance you actually control. Because <em>"someone else's computer"</em> is also a fine description of every Git host that isn't yours.
+  </p>
+  <div class="cta">
+    <a href="#install" class="btn primary">Get it →</a>
+    <a href="https://git.ladon-cloud.ts.net/joyrida/Fork2Self" class="btn">Source</a>
+  </div>
+  <p class="disclaimer">
+    ⚠️ Full disclosure: every line of code, every commit message, every word on this page, and the snide tone of this very disclaimer were written by an LLM. The human in this operation typed prompts and pressed Enter. A lot.
+  </p>
+</section>
+
+<section id="stats">
+  <h2>Some numbers we have</h2>
+  <p class="section-lede">
+    These are real metrics. We're not making them up. We're just choosing the ones that sound impressive — which, to be fair, is also what every other product page does.
+  </p>
+  <div class="stats">
+    <div class="stat">
+      <div class="num">4,812</div>
+      <div class="label">lines of TypeScript hallucinated into existence</div>
+    </div>
+    <div class="stat">
+      <div class="num">0</div>
+      <div class="label">human-authored lines of source code</div>
+    </div>
+    <div class="stat">
+      <div class="num">5</div>
+      <div class="label">supported source platforms</div>
+    </div>
+    <div class="stat">
+      <div class="num">2</div>
+      <div class="label">supported destination backends</div>
+    </div>
+    <div class="stat">
+      <div class="num">∞</div>
+      <div class="label">em-dashes per paragraph</div>
+    </div>
+    <div class="stat">
+      <div class="num">100%</div>
+      <div class="label">of design decisions made by next-token prediction</div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <h2>Features that we are obligated to list</h2>
+  <p class="section-lede">
+    Each of these took roughly one prompt to specify and zero meetings to align on. Disrupting the SDLC, if you will.
+  </p>
+  <div class="features">
+    <div class="feature">
+      <span class="icon">🍴</span>
+      <h3>One-click forks</h3>
+      <p>Click the toolbar button. Or right-click. We added a context menu because someone (the LLM) thought of it.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🌐</span>
+      <h3>Multiple destinations</h3>
+      <p>Configure as many self-hosted Gitea, Forgejo, or GitLab instances as you can stomach. One is the default. The rest live in a submenu, like neglected tabs.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🪞</span>
+      <h3>Pull-mirror mode</h3>
+      <p>Optionally keep your fork in sync with upstream forever. Truly, the most committed relationship you'll have this year.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🎫</span>
+      <h3>Issues, PRs, releases, wikis</h3>
+      <p>Migrate the whole soap opera, not just the code. Subject to what the source and destination can both agree on, like adults.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🔐</span>
+      <h3>Private repo support</h3>
+      <p>Per-host source tokens are stored locally in your browser. No telemetry, no analytics, no "anonymous usage signals." We genuinely cannot be bothered.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🧭</span>
+      <h3>Custom hostname mapping</h3>
+      <p>Have a self-hosted GitLab at <code>git.your-bunker.lan</code>? Tell the extension it's a GitLab and it'll work. We don't ask questions.</p>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <h2>How it works</h2>
+  <p class="section-lede">
+    A three-step process, much like every onboarding flow ever shipped, but this one is real.
+  </p>
+  <div class="how">
+    <div class="step">
+      <h3>Configure a destination</h3>
+      <p>Point it at your self-hosted Git instance and paste a personal access token. Test the connection. Be quietly proud of yourself.</p>
+    </div>
+    <div class="step">
+      <h3>Open a repo page</h3>
+      <p>GitHub, GitLab, Gitea, Forgejo, Codeberg, Bitbucket — anywhere with a recognizable repo URL. The extension does the parsing.</p>
+    </div>
+    <div class="step">
+      <h3>Click "Fork"</h3>
+      <p>Wait a few seconds. Your destination clones the repo (and optionally the issues, PRs, wiki, and so on). Done.</p>
+    </div>
+  </div>
+</section>
+
+<section id="install" class="install-section">
+  <h2>Install</h2>
+  <p class="section-lede">
+    The extension isn't on AMO yet because the human running this project hasn't gotten around to it. You have options.
+  </p>
+  <div class="install">
+    <h3>Option 1 — Build it yourself</h3>
+    <pre><code>git clone https://git.ladon-cloud.ts.net/joyrida/Fork2Self
+cd Fork2Self
+npm install
+npm run package
+# fork2self-X.Y.Z.xpi appears at the repo root</code></pre>
+    <p style="margin-top: 1.5rem;">Then in Firefox: <code>about:debugging</code> → <em>This Firefox</em> → <em>Load Temporary Add-on…</em> → pick <code>dist/manifest.json</code>.</p>
+
+    <h3 style="margin-top: 2rem;">Option 2 — Run the CI workflow</h3>
+    <p>The repo has a Gitea Actions workflow that builds, lints, signs (via <code>web-ext</code>), and uploads an artifact. It's gated to manual runs only, because nobody needs a CI bill from a hobby project.</p>
+
+    <h3 style="margin-top: 2rem;">Option 3 — Wait</h3>
+    <p>If a signed XPI appears on a release page somewhere, that was probably a future version of this project being slightly more responsible. Check the <a href="https://git.ladon-cloud.ts.net/joyrida/Fork2Self">repo</a>.</p>
+  </div>
+</section>
+
+<section id="testimonials">
+  <h2>What people are saying</h2>
+  <p class="section-lede">
+    These quotes were also generated by an LLM. The personas are fictional. Any resemblance to real reviewers, living or dead, is a coincidence — and frankly, suspicious.
+  </p>
+  <div class="testimonials">
+    <div class="quote">
+      <blockquote>"I asked it to fork a repo and it forked the repo. I'm not sure what else I expected, but it delivered."</blockquote>
+      <div class="author"><strong>A. Persona</strong> — Senior Imaginary Developer</div>
+    </div>
+    <div class="quote">
+      <blockquote>"Finally, an extension whose marketing page is more transparent about its origins than my last three coworkers' LinkedIn posts."</blockquote>
+      <div class="author"><strong>B. Stand-In</strong> — DevOps Engineer, Plausibly Real</div>
+    </div>
+    <div class="quote">
+      <blockquote>"It does one thing. It does it well. And nobody is trying to upsell me a B2B SaaS dashboard. Five stars."</blockquote>
+      <div class="author"><strong>C. Composite</strong> — Self-Hosting Enthusiast</div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <h2>FAQ</h2>
+  <p class="section-lede">
+    Anticipated questions. Some of them rhetorical.
+  </p>
+
+  <details>
+    <summary>Did an AI really write all of this?</summary>
+    <p>Yes. The TypeScript, the build pipeline, the README, the Gitea workflow, the Taskfile, this homepage — including this very FAQ entry confirming that an AI wrote everything. The recursion is intentional.</p>
+  </details>
+
+  <details>
+    <summary>Is the code any good?</summary>
+    <p>It typechecks under <code>--strict</code>, lints clean with <code>web-ext lint</code> (zero warnings), and survived a security review. Make of that what you will.</p>
+  </details>
+
+  <details>
+    <summary>Why "Fork2Self"?</summary>
+    <p>Because "fork yourself" is funnier in a directory listing than as a command-line invocation, and because every other name was already taken on npm.</p>
+  </details>
+
+  <details>
+    <summary>Does it phone home?</summary>
+    <p>No. The manifest declares <code>data_collection_permissions: ["none"]</code>, the only network calls are to your configured destination and the source you're forking from, and there is no analytics SDK lurking in the dependencies. We don't even know you're using it. We can't.</p>
+  </details>
+
+  <details>
+    <summary>Why Firefox only?</summary>
+    <p>Manifest V3 portability across browsers is, charitably, a saga. Adding Chrome support is left as an exercise for whoever forks this repo into their self-hosted Git instance using the extension itself.</p>
+  </details>
+
+  <details>
+    <summary>Why is the homepage trying so hard?</summary>
+    <p>Snark was explicitly requested. Blame the prompt, not the model.</p>
+  </details>
+</section>
+
+</main>
+
+<footer>
+  <p>
+    Made by Claude. Reviewed by Claude. Refactored by Claude. Linted by Claude. Shipped by a human who pressed <kbd>Enter</kbd> with conviction.
+  </p>
+  <p class="colophon">
+    No tracking. No cookies. No <em>"we value your privacy"</em> dialog. Just a static HTML file you can read the source of.
+  </p>
+</footer>
+
+</body>
+</html>
