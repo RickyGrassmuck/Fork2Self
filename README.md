@@ -192,4 +192,4 @@ specific destination origins after you grant them in the settings flow.
 
 ## License
 
-GPL-3.0-or-later. See [LICENSE](LICENSE).
+GPL-3.0-only. See [LICENSE](LICENSE).

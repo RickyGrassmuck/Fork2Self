@@ -51,7 +51,8 @@ jobs:
           bunx web-ext sign \
             --source-dir dist \
             --artifacts-dir web-ext-artifacts \
-            --channel "${{ inputs.channel }}"
+            --channel "${{ inputs.channel }}" \
+            --amo-metadata amo-metadata.json
 
       - name: Upload signed XPI
         uses: actions/upload-artifact@v3
