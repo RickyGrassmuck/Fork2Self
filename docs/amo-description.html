@@ -1,0 +1,67 @@
+<p>Fork2Self adds a one-click "Fork to…" action to your browser. When you're on a recognized repository page on GitHub, GitLab, Gitea/Forgejo, Gogs, OneDev, GitBucket, or Bitbucket Cloud, click the toolbar button (or use the right-click context menu) to mirror that repository into a self-hosted Git instance you control.</p>
+
+<p>The cloning happens server-to-server through your destination forge's native migration API. Your browser sends one request; the destination handles the rest. No data passes through any third party.</p>
+
+<p><strong>QUICK START</strong></p>
+
+<ol>
+  <li>Open the extension's options page and add a destination — pick Gitea/Forgejo or GitLab, paste the base URL, and provide a personal access token. Grant host permission for that origin when prompted.</li>
+  <li>Browse to a repository on a supported source.</li>
+  <li>Click the toolbar icon, or right-click and choose "Fork to…". The migration starts immediately and lands in the popup's History tab.</li>
+</ol>
+
+<p><strong>SUPPORTED SOURCES</strong></p>
+
+<ul>
+  <li>GitHub</li>
+  <li>GitLab (gitlab.com and self-hosted)</li>
+  <li>Gitea / Forgejo (including Codeberg)</li>
+  <li>Gogs</li>
+  <li>OneDev</li>
+  <li>GitBucket</li>
+  <li>Bitbucket Cloud</li>
+  <li>Generic Git URL via the custom-hostname mapping</li>
+</ul>
+
+<p><strong>SUPPORTED DESTINATIONS</strong></p>
+
+<ul>
+  <li><strong>Gitea / Forgejo:</strong> full content migration with optional pull-mirror.</li>
+  <li><strong>GitLab CE / EE:</strong> code-only via <code>import_url</code>. Pull-mirror is GitLab EE only.</li>
+</ul>
+
+<p><strong>FEATURES</strong></p>
+
+<ul>
+  <li>One-click forking from the toolbar popup or the right-click "Fork to…" menu.</li>
+  <li>Multiple destinations: configure several self-hosted instances; one is the default for one-click flows, the rest sit in a submenu.</li>
+  <li>Optional content migration: wiki, issues, pull requests, labels, releases, and milestones — toggled per fork by what the source and destination both support.</li>
+  <li>Pull-mirror mode keeps your fork in sync with upstream automatically (on backends that support it).</li>
+  <li>Private source repo support via per-host personal access tokens.</li>
+  <li>Custom hostname mapping for self-hosted source instances (e.g. an internal GitLab at <code>git.example.lan</code>).</li>
+  <li>Migration history with the last 50 attempts. Failed migrations get a manual "Delete repo" button that calls the destination's delete API.</li>
+  <li>Automatic cleanup of partial repos on rate-limit failures (Gitea).</li>
+</ul>
+
+<p><strong>PRIVACY</strong></p>
+
+<ul>
+  <li>No telemetry, no analytics, no remote configuration.</li>
+  <li>Network requests go only to (a) the source repo you're cloning and (b) the destination forge you've configured.</li>
+  <li>Tokens are stored in the browser's local extension storage and are never synced or transmitted elsewhere.</li>
+  <li>The manifest declares <code>data_collection_permissions: ["none"]</code>.</li>
+</ul>
+
+<p><strong>PERMISSIONS</strong></p>
+
+<ul>
+  <li><code>storage</code> — persist destinations, tokens, and migration history locally.</li>
+  <li><code>contextMenus</code> — the "Fork to…" right-click entries.</li>
+  <li><code>notifications</code> — toast on fork start, success, and failure.</li>
+  <li><code>activeTab</code> — read the URL of the tab the action was clicked on, to detect the source repo.</li>
+  <li>Host permissions are NOT requested by default. The extension asks for permission to reach a specific destination origin only when you add or test that destination in the settings flow.</li>
+</ul>
+
+<p><strong>OPEN SOURCE</strong></p>
+
+<p>GPL-3.0-or-later. Source: <a href="https://git.ladon-cloud.ts.net/joyrida/Fork2Self">https://git.ladon-cloud.ts.net/joyrida/Fork2Self</a></p>

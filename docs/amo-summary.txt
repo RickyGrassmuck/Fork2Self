@@ -1,0 +1,1 @@
+Mirror repos from GitHub, GitLab, Gitea/Forgejo, Gogs, OneDev, GitBucket, or Bitbucket into a self-hosted Git instance you control. One click; uses your destination forge's native migration API. No telemetry, no third-party servers.
