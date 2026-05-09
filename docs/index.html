@@ -14,6 +14,7 @@
     --accent: #a48cff;
     --accent-2: #5dd4ff;
     --green: #5dffaa;
+    --warn: #ffd166;
     --card: rgba(255,255,255,0.04);
     --border: rgba(255,255,255,0.08);
     --gradient: linear-gradient(135deg, #a48cff 0%, #5dd4ff 50%, #5dffaa 100%);
@@ -131,6 +132,20 @@
   .btn:hover { transform: translateY(-1px); text-decoration: none; }
   .btn.primary { background: var(--gradient); color: #0b0b16; border-color: transparent; }
   .btn.primary:hover { box-shadow: 0 8px 30px rgba(164,140,255,0.35); }
+
+  .notice {
+    margin: 2.5rem auto 0;
+    max-width: 38em;
+    padding: 1em 1.3em;
+    border: 1px solid rgba(255,209,102,0.4);
+    background: rgba(255,209,102,0.06);
+    border-radius: 10px;
+    color: var(--warn);
+    font-size: 0.95rem;
+    text-align: left;
+  }
+  .notice strong { color: var(--warn); }
+  .notice a { color: var(--warn); text-decoration: underline; }
 
   h2 {
     font-size: clamp(1.7rem, 3.5vw, 2.3rem);
@@ -301,7 +316,7 @@
 <main>
 
 <section class="hero">
-  <div class="eyebrow"><span class="pulse"></span>Firefox extension</div>
+  <div class="eyebrow"><span class="pulse"></span>Beta · Firefox extension</div>
   <h1>Fork repos into <span class="gradient">your own</span> Git server. One click.</h1>
   <p class="lede">
     Fork2Self mirrors repositories from GitHub, GitLab, Gitea, Forgejo, Gogs, OneDev, GitBucket, and Bitbucket Cloud into a self-hosted Git instance you control. Run it from the toolbar popup or the right-click context menu.
@@ -310,6 +325,9 @@
     <a href="#install" class="btn primary">Install →</a>
     <a href="https://github.com/RickyGrassmuck/Fork2Self" class="btn">Source</a>
   </div>
+  <p class="notice">
+    <strong>Beta:</strong> Fork2Self is functional and in active use, but rough edges are expected. Migrations can fail in surprising ways depending on the destination forge's version, the source repo's quirks, and rate limits at either end. Configuration and storage formats may still change between versions without a migration path. Please report issues on the <a href="https://github.com/RickyGrassmuck/Fork2Self/issues">GitHub tracker</a>.
+  </p>
 </section>
 
 <section id="features">

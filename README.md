@@ -8,6 +8,15 @@ Useful when you want a personal mirror of a public repo on your own
 infrastructure — for offline access, immutable backups, internal CI, or just
 because you'd rather host it yourself.
 
+> **Status: beta.** This extension is functional and in active use, but
+> rough edges are expected. Migrations can fail in surprising ways
+> depending on the destination forge's version, the source repo's quirks,
+> and rate limits at either end. Configuration and storage formats may
+> still change between versions without a migration path. Please report
+> issues on [the GitHub tracker](https://github.com/RickyGrassmuck/Fork2Self/issues)
+> with the error message and the source/destination platform versions
+> involved.
+
 ## Features
 
 - **One-click forking** from the toolbar popup or the right-click context
