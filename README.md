@@ -1,5 +1,8 @@
 # Fork2Self
 
+[![License: GPL-3.0-only](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg)](LICENSE)
+[![Sponsor](https://img.shields.io/github/sponsors/RickyGrassmuck?label=Sponsor&logo=github&color=ea4aaa)](https://github.com/sponsors/RickyGrassmuck)
+
 A Firefox extension that adds a one-click "fork" action to GitHub, GitLab,
 Gitea/Forgejo, and Bitbucket Cloud pages. Forks land in a self-hosted Git
 instance you control.
@@ -216,6 +219,12 @@ import in its `index.ts`.
 
 `host_permissions` is empty by default — the extension only gains access to
 specific destination origins after you grant them in the settings flow.
+
+## Sponsor
+
+<iframe src="https://github.com/sponsors/RickyGrassmuck/card" title="Sponsor RickyGrassmuck" height="225" width="600" style="border: 0;"></iframe>
+
+[Sponsor RickyGrassmuck on GitHub →](https://github.com/sponsors/RickyGrassmuck)
 
 ## License
 
