@@ -135,6 +135,21 @@ bun run bump 0.7.0   # or:  task bump VERSION=0.7.0
 
 Updates both files in place. No-op if both are already at the target.
 
+## Source archive (AMO listed submissions)
+
+AMO requires source-code disclosure when the bundled XPI contains
+machine-generated/concatenated code, which Bun's bundler produces. The
+sign workflow auto-builds a deterministic source archive via
+`git archive HEAD` and hands it to AMO via `--upload-source-code`:
+
+```bash
+bun run package:source   # → web-ext-artifacts/source.zip
+```
+
+Only tracked files at HEAD are included (no `node_modules/`, no
+`dist/`, no secrets). Uncommitted changes won't make it into the
+archive — commit first if you're staging a release.
+
 ## CI
 
 Two manual-trigger Gitea Actions workflows live in `.gitea/workflows/`:

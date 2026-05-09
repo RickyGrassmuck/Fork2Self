@@ -56,6 +56,11 @@ tasks:
     cmds:
       - bun run package
 
+  package:source:
+    desc: Build a source archive for AMO listed-channel submissions
+    cmds:
+      - bun run package:source
+
   bump:
     desc: Bump version in package.json and src/manifest.json (pass VERSION=X.Y.Z)
     preconditions:
@@ -72,7 +77,7 @@ tasks:
 
   sign:
     desc: Sign the extension via Mozilla AMO (needs WEB_EXT_API_KEY/SECRET)
-    deps: [check, lint]
+    deps: [check, lint, package:source]
     preconditions:
       - sh: '[ -n "$WEB_EXT_API_KEY" ]'
         msg: "WEB_EXT_API_KEY is not set. Export it or source .mozilla-creds.env."

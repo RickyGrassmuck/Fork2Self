@@ -43,6 +43,9 @@ jobs:
         id: version
         run: echo "version=$(bun pm pkg get version | tr -d '\"')" >> "$GITHUB_OUTPUT"
 
+      - name: Package source archive
+        run: bun run package:source
+
       - name: Sign with web-ext
         env:
           WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
@@ -52,7 +55,8 @@ jobs:
             --source-dir dist \
             --artifacts-dir web-ext-artifacts \
             --channel "${{ inputs.channel }}" \
-            --amo-metadata amo-metadata.json
+            --amo-metadata amo-metadata.json \
+            --upload-source-code web-ext-artifacts/source.zip
 
       - name: Upload signed XPI
         uses: actions/upload-artifact@v3

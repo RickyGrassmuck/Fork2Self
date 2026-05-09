@@ -11,9 +11,10 @@
     "typecheck": "tsc --noEmit",
     "check": "bun run typecheck && bun run build",
     "package": "bun run scripts/package.ts",
+    "package:source": "bun run scripts/package-source.ts",
     "bump": "bun run scripts/bump-version.ts",
     "lint:ext": "web-ext lint --source-dir dist",
-    "sign": "web-ext sign --source-dir dist --artifacts-dir web-ext-artifacts --channel=unlisted --amo-metadata=amo-metadata.json"
+    "sign": "bun run package:source && web-ext sign --source-dir dist --artifacts-dir web-ext-artifacts --channel=unlisted --amo-metadata=amo-metadata.json --upload-source-code=web-ext-artifacts/source.zip"
   },
   "devDependencies": {
     "@types/bun": "^1.1.0",
