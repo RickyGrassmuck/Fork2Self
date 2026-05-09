@@ -1,6 +1,6 @@
 {
   "name": "fork2self",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "Firefox extension that forks GitHub/GitLab/Gitea/Bitbucket repos into your self-hosted Git instance.",
   "license": "GPL-3.0-only",
@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "check": "bun run typecheck && bun run build",
     "package": "bun run scripts/package.ts",
+    "bump": "bun run scripts/bump-version.ts",
     "lint:ext": "web-ext lint --source-dir dist",
     "sign": "web-ext sign --source-dir dist --artifacts-dir web-ext-artifacts --channel=unlisted --amo-metadata=amo-metadata.json"
   },

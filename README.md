@@ -123,6 +123,18 @@ bun run package
 Produces `fork2self-<version>.xpi` at the repo root. Requires the `zip`
 command on PATH.
 
+## Version bump
+
+`package.json` and `src/manifest.json` both carry the project version
+and must stay in sync — package.json drives CI artifact names, while
+src/manifest.json is the version Firefox/AMO actually record.
+
+```bash
+bun run bump 0.7.0   # or:  task bump VERSION=0.7.0
+```
+
+Updates both files in place. No-op if both are already at the target.
+
 ## CI
 
 Two manual-trigger Gitea Actions workflows live in `.gitea/workflows/`:
