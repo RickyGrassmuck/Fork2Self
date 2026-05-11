@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Fork2Self",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Fork repositories from GitHub, GitLab, Gitea/Forgejo, Bitbucket, or any Git URL into your self-hosted Git instance with one click.",
   "homepage_url": "https://rickygrassmuck.github.io/Fork2Self/",
   "browser_specific_settings": {
